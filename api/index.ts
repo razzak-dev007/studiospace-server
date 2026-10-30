@@ -69,14 +69,20 @@ app.use((err: any, _req: Request, res: Response, _next: any) => {
   });
 });
 
-// Connect to DB once (Vercel keeps functions warm between requests)
-let isDbConnected = false;
-const handler = async (req: any, res: any) => {
-  if (!isDbConnected) {
-    await connectToDatabase();
-    await seedDatabase();
-    isDbConnected = true;
+// Singleton initialization promise — guarantees all requests wait for seeding to complete
+let initPromise: Promise<void> | null = null;
+async function ensureDb() {
+  if (!initPromise) {
+    initPromise = (async () => {
+      await connectToDatabase();
+      await seedDatabase();
+    })();
   }
+  return initPromise;
+}
+
+const handler = async (req: any, res: any) => {
+  await ensureDb();
   return app(req, res);
 };
 

@@ -13,12 +13,12 @@ router.get('/', verifyAuth, async (req: AuthRequest, res: Response) => {
 
     const wishlistCol = getWishlistCollection();
     const items = await wishlistCol.find({ userEmail }).toArray();
-    const studioIds = items.map(item => item.studioId);
+    const studioIds = items.map((item: any) => item.studioId);
 
     const studiosCol = getStudiosCollection();
     const objectIds = studioIds
-      .filter(id => ObjectId.isValid(id))
-      .map(id => new ObjectId(id));
+      .filter((id: any) => ObjectId.isValid(id))
+      .map((id: any) => new ObjectId(id));
 
     const studios = await studiosCol.find({ _id: { $in: objectIds } }).toArray();
 

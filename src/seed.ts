@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { connectToDatabase, getStudiosCollection, getUsersCollection } from './db.js';
+import { connectToDatabase, getStudiosCollection, getUsersCollection, isSeeded, markSeeded } from './db.js';
 import { Studio, User } from './types.js';
 
 export const SAMPLE_STUDIOS: Omit<Studio, '_id'>[] = [
@@ -267,7 +267,12 @@ export const SAMPLE_STUDIOS: Omit<Studio, '_id'>[] = [
 ];
 
 export async function seedDatabase() {
-  const db = await connectToDatabase();
+  // Skip if already seeded in this process (important for Vercel warm instances)
+  if (isSeeded()) {
+    console.log('[Seed] Already seeded in this instance. Skipping.');
+    return;
+  }
+  await connectToDatabase();
   const studiosCol = getStudiosCollection();
   const usersCol = getUsersCollection();
 
@@ -301,6 +306,7 @@ export async function seedDatabase() {
   } else {
     console.log(`[Seed] Database already has ${studioCount} studios. Seed skipped.`);
   }
+  markSeeded();
 }
 
 // Allow standalone execution

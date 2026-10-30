@@ -78,7 +78,7 @@ router.get('/categories/meta', async (_req, res) => {
     ]).toArray();
 
     const categoryData = categories.map(cat => {
-      const match = counts.find(c => c._id === cat.value);
+      const match = counts.find((c: any) => c._id === cat.value);
       return { ...cat, count: match ? match.count : 0 };
     });
 
